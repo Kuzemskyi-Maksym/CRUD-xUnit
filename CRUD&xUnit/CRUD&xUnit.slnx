@@ -1,7 +1,7 @@
 <Solution>
-  <Folder Name="/Solution Items/" />
   <Project Path="../Entities/Entities.csproj" />
   <Project Path="../ServiceContracts/ServiceContracts.csproj" />
   <Project Path="../Services/Services.csproj" />
-  <Project Path="CRUD&amp;xUnit.csproj" />
+  <Project Path="../Tests/Tests.csproj" Id="a42b7974-c693-4a39-815f-251d82e9f031" />
+  <Project Path="CRUD_xUnit.csproj" />
 </Solution>

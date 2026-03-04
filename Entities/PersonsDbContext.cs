@@ -7,8 +7,7 @@ namespace Entities
 {
     public class PersonsDbContext : DbContext
     {
-
-        public PersonsDbContext(DbContextOptions options) : base (options) { }
+        public PersonsDbContext(DbContextOptions options) : base(options) { }
 
         public DbSet<Person> Persons { get; set; }
         public DbSet<Country> Countries { get; set; }
@@ -20,42 +19,46 @@ namespace Entities
             modelBuilder.Entity<Country>().ToTable("Countries");
             modelBuilder.Entity<Person>().ToTable("Persons");
 
-            //seed data
+            // Fluent API
+            modelBuilder.Entity<Person>()
+                .Property(person => person.Address)
+                .HasColumnName("ActualAddress")
+                .HasColumnType("varchar(60)")
+                .HasDefaultValue("Academian street");
 
-            var options = new JsonSerializerOptions
+            // Seed data — тільки якщо файли існують (не InMemory тести)
+            try
             {
-                Converters = { new JsonStringEnumConverter() }
-            };
+                var jsonOptions = new JsonSerializerOptions
+                {
+                    Converters = { new JsonStringEnumConverter() }
+                };
 
-            string basePath = AppContext.BaseDirectory;
+                string basePath = AppContext.BaseDirectory;
+                string countriesPath = Path.Combine(basePath, "countries.json");
+                string personsPath = Path.Combine(basePath, "persons.json");
 
-            string countriesJson = File.ReadAllText(
-                Path.Combine(basePath, "countries.json"));
+                if (File.Exists(countriesPath) && File.Exists(personsPath))
+                {
+                    string countriesJson = File.ReadAllText(countriesPath);
+                    string personsJson = File.ReadAllText(personsPath);
 
-            string personsJson = File.ReadAllText(
-                Path.Combine(basePath, "persons.json")); 
-            
-            List<Country> countries = System.Text.Json.JsonSerializer.Deserialize<List<Country>>(countriesJson);
-            List<Person> persons = System.Text.Json.JsonSerializer.Deserialize<List<Person>>(personsJson, options);
+                    List<Country>? countries = JsonSerializer.Deserialize<List<Country>>(countriesJson);
+                    List<Person>? persons = JsonSerializer.Deserialize<List<Person>>(personsJson, jsonOptions);
 
-            foreach (Country country in countries)
+                    if (countries != null)
+                        foreach (Country country in countries)
+                            modelBuilder.Entity<Country>().HasData(country);
+
+                    if (persons != null)
+                        foreach (Person person in persons)
+                            modelBuilder.Entity<Person>().HasData(person);
+                }
+            }
+            catch
             {
-                modelBuilder.Entity<Country>().HasData(country);
+                // У тестовому середовищі (InMemory) — ігноруємо seed data
             }
-
-            foreach (Person person in persons)
-            {   
-                modelBuilder.Entity<Person>().HasData(person);
-            }
-
-            //Fluent api
-            modelBuilder.Entity<Person>().Property(person => person.Address).HasColumnName("ActualAddress").HasColumnType("varchar(60)").HasDefaultValue("Academian street");
-
-            //table relations(
-            //modelBuilder.Entity<Person>(entity =>
-            //{
-            //    entity.HasOne<Country>(country => country.Country).WithMany(person => person.Persons).HasForeignKey(person => person.CountryID);
-            //});
         }
 
         public List<Person> sp_GetAllPersons()
@@ -65,7 +68,8 @@ namespace Entities
 
         public void sp_AddPerson(Person person)
         {
-            SqlParameter[] parameters = new SqlParameter[] {
+            SqlParameter[] parameters = new SqlParameter[]
+            {
                 new SqlParameter("@PersonID", person.PersonID),
                 new SqlParameter("@PersonName", person.PersonName),
                 new SqlParameter("@Email", person.Email),
@@ -76,7 +80,9 @@ namespace Entities
                 new SqlParameter("@ReceiveNewsLetters", person.ReceiveNewsLetters),
             };
 
-            Database.ExecuteSqlRaw("EXECUTE [dbo].[InsertPerson] @PersonID, @PersonName, @Email, @DateOfBirth, @Gender, @CountryID, @Address, @ReceiveNewsLetters", parameters); 
+            Database.ExecuteSqlRaw(
+                "EXECUTE [dbo].[InsertPerson] @PersonID, @PersonName, @Email, @DateOfBirth, @Gender, @CountryID, @Address, @ReceiveNewsLetters",
+                parameters);
         }
     }
 }
