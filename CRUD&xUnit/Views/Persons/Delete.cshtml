@@ -1,0 +1,56 @@
+﻿@using Entities.DTO
+@model PersonResponse
+@{
+    ViewBag.Title = "Delete Person";
+}
+
+<a href="~/persons/index" class="link-hover">Back</a>
+<h2>Delete Person</h2>
+
+<div class="w-50">
+    <form asp-controller="Persons" asp-action="Delete" asp-route-personID="@Model.PersonID" method="post">
+
+        <input type="hidden" asp-for="PersonID"/>
+
+        <div class="form-field flex">
+            <div class="w-25">
+                <label asp-for="PersonName" class="form-label pt">Person Name</label>
+            </div>
+            <div class="flex-1">
+                <input asp-for="PersonName" class="form-input" disabled="disabled" />
+                <span asp-validation-for="PersonName"></span>
+            </div>
+        </div>
+
+        <div class="form-field flex">
+            <div class="w-25">
+                <label asp-for="Email" class="form-label pt">Email</label>
+            </div>
+            <div class="flex-1">
+                <input asp-for="Email" type="email" class="form-input" disabled="disabled" />
+                <span asp-validation-for="Email"></span>
+            </div>
+        </div>
+
+
+        <div class="form-field flex">
+            <div class="w-25">
+            </div>
+            <div class="flex-1">
+                <button class="button button-green-back">Delete</button>
+                <div asp-validation-summary="All" class="text-red"></div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.21.0/jquery.validate.min.js" 
+integrity="sha512-KFHXdr2oObHKI9w4Hv1XPKc898mE4kgYx58oqsc/JqqdLMDI4YjOLzom+EMlW8HFUd0QfjfAvxSL6sEq/a42fQ==" crossorigin="anonymous" 
+referrerpolicy="no-referrer"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js" 
+integrity="sha512-o6XqxgrUsKmchwy9G5VRNWSSxTS4Urr4loO6/0hYdpWmFUfHqGzawGxeQGMDqYzxjY9sbktPbNlkIQJWagVZQg==" 
+crossorigin="anonymous" referrerpolicy="no-referrer"></script>

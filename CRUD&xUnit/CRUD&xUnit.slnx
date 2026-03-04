@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Solution Items/" />
+  <Project Path="../Entities/Entities.csproj" />
+  <Project Path="../ServiceContracts/ServiceContracts.csproj" />
+  <Project Path="../Services/Services.csproj" />
+  <Project Path="CRUD&amp;xUnit.csproj" />
+</Solution>
