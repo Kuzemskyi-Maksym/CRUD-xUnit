@@ -1,4 +1,5 @@
 ﻿using CRUD_xUnit.Filters.ActionFilters;
+using CRUD_xUnit.Filters.ExceptionFilters;
 using CRUDExample.Filters.ActionFilters;
 using CRUDExample.Filters.AuthorizationFilter;
 using CRUDExample.Filters.ResourceFilters;
@@ -17,6 +18,7 @@ namespace CRUD_xUnit.Controllers
 {
     [Route("[controller]")]
     [TypeFilter(typeof(ResponseHeaderActionFilter), Arguments = new object[] {"My-Key-From-Controller", "My-Value-From-Controller", 3}, Order = 3)]
+    [TypeFilter(typeof(HandleExceptionFilter))]
     public class PersonsController : Controller
     {
         private readonly IPersonsService _personsService;
@@ -119,8 +121,8 @@ namespace CRUD_xUnit.Controllers
             return RedirectToAction("Index");
         }
 
-        [Route("[action]/{personID}")]
         [HttpGet]
+        [Route("[action]/{personID}")]
         public async Task<IActionResult> Delete(Guid personID)
         {
             PersonResponse? personResponse = await _personsService.GetPersonById(personID);
@@ -131,8 +133,8 @@ namespace CRUD_xUnit.Controllers
             return View(personResponse);
         }
 
-        [Route("[action]/{personID}")]
         [HttpPost]
+        [Route("[action]/{personID}")]
         public async Task<IActionResult> Delete(Guid personID, PersonUpdateRequest personUpdateRequest)
         {
             PersonResponse? personResponse = await _personsService.GetPersonById(personUpdateRequest.PersonID);
