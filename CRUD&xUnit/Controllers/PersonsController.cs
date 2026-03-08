@@ -1,5 +1,8 @@
 ﻿using CRUD_xUnit.Filters.ActionFilters;
 using CRUDExample.Filters.ActionFilters;
+using CRUDExample.Filters.AuthorizationFilter;
+using CRUDExample.Filters.ResourceFilters;
+using CRUDExample.Filters.ResultFilters;
 using Entities;
 using Entities.DTO;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +31,8 @@ namespace CRUD_xUnit.Controllers
         [Route("/")]
         [Route("[action]")]
         [TypeFilter(typeof(PersonsListActionFilter), Order = 4)]
-        [TypeFilter(typeof(ResponseHeaderActionFilter), Arguments = new object[] { "My-Key-From-Method", "My-Value-From-Method", 1 }, Order = 1)]
+        [TypeFilter(typeof(ResponseHeaderActionFilter), Arguments = new object[] { "MyKey-FromAction", "MyValue-From-Action", 1 }, Order = 1)]
+        [TypeFilter(typeof(PersonsListResultFilter))]
         public async Task<IActionResult> Index(string searchBy, string? searchString, string sortBy = nameof(PersonResponse.PersonName),
             SortOrderOptions sortOrderOption = SortOrderOptions.ASC)
         {
@@ -59,6 +63,7 @@ namespace CRUD_xUnit.Controllers
 
         [HttpGet]
         [Route("[action]")]
+        [TypeFilter(typeof(ResponseHeaderActionFilter), Arguments = new object[] { "my-key", "my-value", 4 })]
         public async Task<IActionResult> Create()
         {
             List<CountryResponse> allCountries = await _countriesService.GetAllCountries();
@@ -70,6 +75,7 @@ namespace CRUD_xUnit.Controllers
         [HttpPost]
         [Route("[action]")]
         [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
+        [TypeFilter(typeof(FeatureDisabledResourceFilter), Arguments = new object[] { false })]
         public async Task<IActionResult> Create(PersonAddRequest personRequest)
         {
             PersonResponse personResponse = await _personsService.AddPerson(personRequest);
@@ -78,6 +84,7 @@ namespace CRUD_xUnit.Controllers
 
         [HttpGet]
         [Route("[action]/{personID}")]
+        [TypeFilter(typeof(TokenResultFilter))]
         public async Task<IActionResult> Edit(Guid personID)
         {
             PersonResponse? personResponse = await _personsService.GetPersonById(personID);
@@ -98,6 +105,7 @@ namespace CRUD_xUnit.Controllers
         [HttpPost]
         [Route("[action]/{personID}")]
         [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
+        [TypeFilter(typeof(TokenAuthorizationFilter))]
         public async Task<IActionResult> Edit(PersonUpdateRequest personRequest)
         {
             PersonResponse? personResponse = await _personsService.GetPersonById(personRequest.PersonID);
