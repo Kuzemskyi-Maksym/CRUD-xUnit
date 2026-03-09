@@ -1,5 +1,7 @@
-﻿using CRUD_xUnit.Filters.ActionFilters;
+﻿using CRUD_xUnit.Filters;
+using CRUD_xUnit.Filters.ActionFilters;
 using CRUD_xUnit.Filters.ExceptionFilters;
+using CRUD_xUnit.Filters.ResultFilters;
 using CRUDExample.Filters.ActionFilters;
 using CRUDExample.Filters.AuthorizationFilter;
 using CRUDExample.Filters.ResourceFilters;
@@ -17,8 +19,9 @@ using ServiceContracts.Enums;
 namespace CRUD_xUnit.Controllers
 {
     [Route("[controller]")]
-    [TypeFilter(typeof(ResponseHeaderActionFilter), Arguments = new object[] {"My-Key-From-Controller", "My-Value-From-Controller", 3}, Order = 3)]
-    [TypeFilter(typeof(HandleExceptionFilter))]
+    [ResponseHeaderFilterFactory("My-Key-From-Controller", "My-Value-From-Controller", 3)]
+    [ServiceFilter(typeof(HandleExceptionFilter))]
+    [ServiceFilter(typeof(PersonsAlwaysRunResultFilter))]
     public class PersonsController : Controller
     {
         private readonly IPersonsService _personsService;
@@ -32,9 +35,10 @@ namespace CRUD_xUnit.Controllers
 
         [Route("/")]
         [Route("[action]")]
-        [TypeFilter(typeof(PersonsListActionFilter), Order = 4)]
-        [TypeFilter(typeof(ResponseHeaderActionFilter), Arguments = new object[] { "MyKey-FromAction", "MyValue-From-Action", 1 }, Order = 1)]
-        [TypeFilter(typeof(PersonsListResultFilter))]
+        [ServiceFilter(typeof(PersonsListActionFilter), Order = 4)]
+        [ServiceFilter(typeof(PersonsListResultFilter))]
+        [ResponseHeaderFilterFactory("MyKey-FromAction", "MyValue-From-Action", 1)]
+        [SkipFilter]
         public async Task<IActionResult> Index(string searchBy, string? searchString, string sortBy = nameof(PersonResponse.PersonName),
             SortOrderOptions sortOrderOption = SortOrderOptions.ASC)
         {
@@ -50,12 +54,12 @@ namespace CRUD_xUnit.Controllers
             };
 
             List<PersonResponse> persons = await _personsService.GetFilteredPersons(searchBy, searchString);
-            
+
             ViewBag.CurrentSearchBy = searchBy;
             ViewBag.CurrentSearchString = searchString;
 
             //sorting
-            List<PersonResponse>  sortedPersons = await _personsService.GetSortedPersons(persons, sortBy, sortOrderOption);
+            List<PersonResponse> sortedPersons = await _personsService.GetSortedPersons(persons, sortBy, sortOrderOption);
             ViewBag.CurrentSortBy = sortBy;
             ViewBag.CurrentSortOrder = sortOrderOption.ToString();
 
@@ -65,7 +69,7 @@ namespace CRUD_xUnit.Controllers
 
         [HttpGet]
         [Route("[action]")]
-        [TypeFilter(typeof(ResponseHeaderActionFilter), Arguments = new object[] { "my-key", "my-value", 4 })]
+        [ResponseHeaderFilterFactory( "my-key", "my-value", 4 )]
         public async Task<IActionResult> Create()
         {
             List<CountryResponse> allCountries = await _countriesService.GetAllCountries();
@@ -76,7 +80,7 @@ namespace CRUD_xUnit.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
+        [ServiceFilter(typeof(PersonCreateAndEditPostActionFilter))]
         [TypeFilter(typeof(FeatureDisabledResourceFilter), Arguments = new object[] { false })]
         public async Task<IActionResult> Create(PersonAddRequest personRequest)
         {
@@ -86,7 +90,7 @@ namespace CRUD_xUnit.Controllers
 
         [HttpGet]
         [Route("[action]/{personID}")]
-        [TypeFilter(typeof(TokenResultFilter))]
+        [ServiceFilter(typeof(TokenResultFilter))]
         public async Task<IActionResult> Edit(Guid personID)
         {
             PersonResponse? personResponse = await _personsService.GetPersonById(personID);
@@ -106,8 +110,8 @@ namespace CRUD_xUnit.Controllers
 
         [HttpPost]
         [Route("[action]/{personID}")]
-        [TypeFilter(typeof(PersonCreateAndEditPostActionFilter))]
-        [TypeFilter(typeof(TokenAuthorizationFilter))]
+        [ServiceFilter(typeof(PersonCreateAndEditPostActionFilter))]
+        [ServiceFilter(typeof(TokenAuthorizationFilter))]
         public async Task<IActionResult> Edit(PersonUpdateRequest personRequest)
         {
             PersonResponse? personResponse = await _personsService.GetPersonById(personRequest.PersonID);
